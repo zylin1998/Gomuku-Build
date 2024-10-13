@@ -27,9 +27,11 @@ namespace Gomuku
 
         private EStoneType _Turn = EStoneType.None;
 
-        private List<int> _Records;
+        private List<int>           _Records;
         private List<StoneListener> _Stones;
-        private bool _Gaming;
+        private bool                _Gaming;
+        private OptionListener      _Start;
+        private OptionListener      _Quit;
 
         protected override void RegisterEvents()
         {
@@ -43,10 +45,10 @@ namespace Gomuku
                 .OfType<OptionListener>()
                 .ToDictionary(k => k.Id);
 
-            var start = options[0];
-            var quit  = options[1];
+            _Start = options[0];
+            _Quit  = options[1];
 
-            start.AddListener((id => 
+            _Start.AddListener((id => 
             {
                 _Records = new int[Declarations.Size.Pow(2)].ToList();
 
@@ -64,8 +66,10 @@ namespace Gomuku
                 SettleEvents(new ResetBoard(), new ResetTimer(), new StartTimer());
 
                 _Gaming = true;
+
+                _Start.Listener.interactable = false;
             }));
-            quit.AddListener((id =>
+            _Quit.AddListener((id =>
             {
                 var send = new SendConfirm("¬O§_Â÷¶}¹CÀ¸",
                     () => Application.Quit(),
@@ -99,7 +103,7 @@ namespace Gomuku
             {
                 var temp = UnityEngine.Random.Range(0, _Records.Count - 1);
 
-                if (_Records[index] == 0) { index = temp; }
+                if (_Records[temp] == 0) { index = temp; }
             }
 
             Step(index);
@@ -114,6 +118,8 @@ namespace Gomuku
             _Stones.ForEach(s => s.Listener.interactable = false);
 
             _Gaming = false;
+
+            _Start.Listener.interactable = true;
         }
 
         private void Step(int id) 
